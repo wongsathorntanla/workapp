@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_this, await_only_futures
+
 import 'dart:io';
 
 import 'package:flutter_database/models/Transactions.dart';
@@ -30,7 +32,7 @@ class TransactionDB {
     //ฐานข้อมูล => store
     // transaction.db = > expense
     var db = await this.openDatabase();
-    var store = intMapStoreFactory.store(" expense ");
+    var store = intMapStoreFactory.store("expense");
 
     // json
     var keyID = store.add(db, {
@@ -43,21 +45,20 @@ class TransactionDB {
   }
 
   // ตึงข้อมูล
- Future <List<Transactions>> LoadAllData() async{ 
+  Future<List<Transactions>> loadAllData() async {
     var db = await this.openDatabase();
     var store = intMapStoreFactory.store("expense");
-    var snapshot = await store.find(db, finder: Finder(sortOrders: [SortOrder(Field.key, false)]));
-    List <Transactions> transectionList = List<Transactions>.from(<List<Transactions>>[]);
-    for(dynamic record in snapshot){
-      transectionList.add(
-        Transactions(
-          title: record["title"], 
-          amount: record["amount"], 
-          date: DateTime.parse(record["date"])
-          )
-      );
+    var snapshot = await store.find(db,
+        finder: Finder(sortOrders: [SortOrder(Field.key, false)]));
+    List<Transactions> transactionList =
+        List<Transactions>.from(<Transactions>[]);
+    //ดึงมาทีละแถว
+    for (RecordSnapshot<int, Map<String, dynamic>> record in snapshot) {
+      transactionList.add(Transactions(
+          title: record.value[" title "],
+          amount: record.value[" amount "],
+          date: DateTime.parse(record.value[" date "])));
     }
-    return transectionList;
-
+    return transactionList;
   }
 }

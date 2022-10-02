@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_database/providers/transaction_provider.dart';
 import 'package:flutter_database/screens/form_screen.dart';
+import 'package:flutter_database/widget/dropdown.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'models/Transactions.dart';
-
 
 void main() {
   runApp(const MyApp());
@@ -42,6 +42,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   @override
+  void initState() {
+    Provider.of<TransactionProvider>(context, listen: false).initData();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -60,31 +66,63 @@ class _MyHomePageState extends State<MyHomePage> {
           builder: (context, TransactionProvider provider, child) {
             var count = provider.transactions.length; //นับจำนวนข้อมูล
             if (count <= 0) {
-              return const Center(
-                child: Text(
-                  "ไม่พบข้อมูล",
-                  style: TextStyle(fontSize: 35),
+              return Center(
+                child: Column(
+                  children: const [
+                    Text(
+                      "ไม่พบข้อมูล",
+                      style: TextStyle(fontSize: 35),
+                    ),
+                  ],
                 ),
               );
             } else {
-              return ListView.builder(
-                  itemCount: count,
-                  itemBuilder: (context, int index) {
-                    Transactions data = provider.transactions[index];
-                    return Card(
-                      elevation: 5,
-                      margin: const EdgeInsets.all(10.0),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          child: FittedBox(
-                            child: Text(data.amount.toString()),
-                          ),
-                        ),
-                        title: Text(data.title),
-                        subtitle: Text(DateFormat("dd/MM/yyyy").format(data.date)),
-                      ),
-                    );
-                  });
+              return Column(
+                children: [
+                  const DropdownButtonExample(),
+                  (provider.filter.isEmpty)
+                      ? ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: count,
+                          itemBuilder: (context, int index) {
+                            Transactions data = provider.transactions[index];
+                            return Card(
+                              elevation: 5,
+                              margin: const EdgeInsets.all(10.0),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  child: FittedBox(
+                                    child: Text(data.amount.toString()),
+                                  ),
+                                ),
+                                title: Text(data.title),
+                                subtitle: Text(
+                                    DateFormat("dd/MM/yyyy").format(data.date)),
+                              ),
+                            );
+                          })
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: provider.filter.length,
+                          itemBuilder: (context, int index) {
+                            Transactions data = provider.filter[index];
+                            return Card(
+                              elevation: 5,
+                              margin: const EdgeInsets.all(10.0),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  child: FittedBox(
+                                    child: Text(data.amount.toString()),
+                                  ),
+                                ),
+                                title: Text(data.title),
+                                subtitle: Text(
+                                    DateFormat("dd/MM/yyyy").format(data.date)),
+                              ),
+                            );
+                          }),
+                ],
+              );
             }
           },
         ));
